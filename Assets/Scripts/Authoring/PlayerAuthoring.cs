@@ -1,5 +1,6 @@
 ﻿using Components;
 using Unity.Entities;
+using Unity.Rendering;
 using UnityEngine;
 
 namespace Authoring
@@ -13,6 +14,8 @@ namespace Authoring
                 var entity = GetEntity(TransformUsageFlags.Dynamic);
                 
                 AddComponent<PlayerTag>(entity);
+                AddComponent<TeamComponent>(entity);
+                AddComponent<URPMaterialPropertyBaseColor>(entity);
             }
         }
     }

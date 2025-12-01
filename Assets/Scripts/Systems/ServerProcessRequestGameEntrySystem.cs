@@ -5,6 +5,7 @@ using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
+using Utils;
 
 namespace Systems
 {
@@ -25,22 +26,36 @@ namespace Systems
             var ecb = new EntityCommandBuffer(Allocator.Temp);
             var prefabs = SystemAPI.GetSingleton<PrefabsComponent>();
             
-            foreach (var (createPlayerRequestRpc, requestSource, rpcEntity) in 
-                SystemAPI.Query<RequestCreatePlayerRpc, ReceiveRpcCommandRequest>()
+            foreach (var (requestSource, rpcEntity) in 
+                SystemAPI.Query<RefRO<ReceiveRpcCommandRequest>>()
+                    .WithAll<RequestCreatePlayerRpc>()
                     .WithEntityAccess())
             {
                 ecb.DestroyEntity(rpcEntity);
-                ecb.AddComponent<NetworkStreamInGame>(requestSource.SourceConnection);
+                ecb.AddComponent<NetworkStreamInGame>(requestSource.ValueRO.SourceConnection);
 
-                var player = ecb.Instantiate(prefabs.PlayerPrefab);
+                var networkId = SystemAPI.GetComponent<NetworkId>(requestSource.ValueRO.SourceConnection);
+                var playerCharacter = ecb.Instantiate(prefabs.PlayerPrefab);
                 var spawnPosition = new float3(0, 1, 0);
                 var newTransform = LocalTransform.FromPosition(spawnPosition);
-                ecb.SetComponent(player, newTransform);
+                ecb.SetComponent(playerCharacter, newTransform);
                 
-                ecb.AddComponent(player, new GhostOwner
+                ecb.SetComponent(playerCharacter, new TeamComponent
                 {
-                    NetworkId = 
+                    Value = ETeam.None
                 });
+                
+                ecb.AddComponent(playerCharacter, new GhostOwner
+                {
+                    NetworkId = networkId.Value
+                });
+                
+                ecb.AppendToBuffer(requestSource.ValueRO.SourceConnection, new LinkedEntityGroup
+                {
+                    Value = playerCharacter
+                });
+                
+                ecb.AddComponent<NewPlayerCharacterTag>(playerCharacter);
             }
             
             ecb.Playback(state.EntityManager);
