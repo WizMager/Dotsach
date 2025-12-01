@@ -15,6 +15,7 @@ namespace Authoring
                 
                 AddComponent<PlayerTag>(entity);
                 AddComponent<TeamComponent>(entity);
+                AddComponent<CharacterColorComponent>(entity);
                 AddComponent<URPMaterialPropertyBaseColor>(entity);
             }
         }

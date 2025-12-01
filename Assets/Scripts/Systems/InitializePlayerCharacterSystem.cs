@@ -4,8 +4,8 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
-using Unity.Rendering;
 using Utils;
+using Random = Unity.Mathematics.Random;
 
 namespace Systems
 {
@@ -21,16 +21,24 @@ namespace Systems
                     .WithAll<NewPlayerCharacterTag>()
                     .WithEntityAccess())
             {
-                var characterColor = team.ValueRO.Value switch
-                {
-                    ETeam.Red => new float4(1, 0, 0, 1),
-                    ETeam.Blue => new float4(0, 0, 1, 1),
-                    _ => GenerateColorFromNetworkId(ghostOwner.ValueRO.NetworkId)
-                };
+                float4 characterColor;
                 
-                ecb.SetComponent(entity, new URPMaterialPropertyBaseColor
+                switch (team.ValueRO.Value)
                 {
-                    Value = characterColor
+                    case ETeam.Red:
+                        characterColor = new float4(1, 0, 0, 1);
+                        break;
+                    case ETeam.Blue:
+                        characterColor = new float4(0, 0, 1, 1);
+                        break;
+                    default:
+                        GenerateColorFromNetworkId(ghostOwner.ValueRO.NetworkId, out characterColor);
+                        break;
+                }
+                
+                ecb.SetComponent(entity, new CharacterColorComponent
+                {
+                    Color = characterColor
                 });
                 
                 ecb.RemoveComponent<NewPlayerCharacterTag>(entity);
@@ -40,14 +48,14 @@ namespace Systems
         }
         
         [BurstCompile]
-        private static float4 GenerateColorFromNetworkId(int networkId)
+        private static void GenerateColorFromNetworkId(int networkId, out float4 color)
         {
             var random = Random.CreateFromIndex((uint)networkId);
             var r = random.NextFloat(0.3f, 1f);
             var g = random.NextFloat(0.3f, 1f);
             var b = random.NextFloat(0.3f, 1f);
             
-            return new float4(r, g, b, 1.0f);
+            color =  new float4(r, g, b, 1.0f);
         }
     }
 }
