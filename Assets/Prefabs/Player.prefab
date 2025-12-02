@@ -204,3 +204,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cca7f442bd36497389a822a8d7a41ee0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MoveSpeed: 10
+  MouseSensitivity: 1
+  MinVerticalAngle: -80
+  MaxVerticalAngle: 80
+  YCameraOffset: 1
