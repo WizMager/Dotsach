@@ -12,7 +12,8 @@ namespace Systems
         {
             state.EntityManager.AddComponentObject(state.SystemHandle, new InputActionsComponent
             {
-                MoveActions = InputSystem.actions.FindAction("Move")
+                MoveActions = InputSystem.actions.FindAction("Move"),
+                LookActions =  InputSystem.actions.FindAction("Look"),
             });
         }
         
@@ -24,10 +25,14 @@ namespace Systems
                 
                 var actions = state.EntityManager.GetComponentObject<InputActionsComponent>(state.SystemHandle);
                 var move = actions.MoveActions.ReadValue<Vector2>();
+                var look = actions.LookActions.ReadValue<Vector2>();
                 
                 playerInput.ValueRW.MoveHorizontal = move.x;
                 playerInput.ValueRW.MoveVertical = move.y;
-
+                
+                playerInput.ValueRW.LookHorizontal = look.x;
+                playerInput.ValueRW.LookVertical = look.y;
+                
                 var keyboard = Keyboard.current;
 
                 if (keyboard == null)

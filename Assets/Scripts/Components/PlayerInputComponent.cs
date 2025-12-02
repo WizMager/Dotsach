@@ -7,6 +7,9 @@ namespace Components
     {
         public float MoveHorizontal;
         public float MoveVertical;
+        
+        public float LookHorizontal;
+        public float LookVertical;
 
         public InputEvent Fire;
         public InputEvent Jump;

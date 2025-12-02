@@ -6,5 +6,6 @@ namespace Components
     public class InputActionsComponent : IComponentData
     {
         public InputAction MoveActions;
+        public InputAction LookActions;
     }
 }
