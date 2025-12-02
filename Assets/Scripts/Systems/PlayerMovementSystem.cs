@@ -19,7 +19,10 @@ namespace Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            var speed = SystemAPI.Time.DeltaTime * 10;
+            //TODO: to settings
+            const float moveSpeed = 10;
+            
+            var speed = SystemAPI.Time.DeltaTime * moveSpeed;
 
             foreach (var (transform, input) in 
                 SystemAPI.Query<RefRW<LocalTransform>, RefRO<PlayerInputComponent>>()
@@ -29,7 +32,8 @@ namespace Systems
                     continue;
                 
                 var move = new float3(input.ValueRO.MoveHorizontal, 0, input.ValueRO.MoveVertical) * speed;
-                transform.ValueRW.Position += move;
+                var rotatedMove = math.rotate(transform.ValueRO.Rotation, move);
+                transform.ValueRW.Position += rotatedMove;
             }
         }
     }
