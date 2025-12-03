@@ -205,7 +205,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MoveSpeed: 10
-  MouseSensitivity: 1
+  MouseSensitivity: 0.5
   MinVerticalAngle: -80
   MaxVerticalAngle: 80
   YCameraOffset: 1

@@ -3,6 +3,7 @@ using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.NetCode;
+using Unity.Physics;
 using Unity.Transforms;
 
 namespace Systems
@@ -20,18 +21,20 @@ namespace Systems
         public void OnUpdate(ref SystemState state)
         {
             var config = SystemAPI.GetSingleton<PlayerInputConfigsComponent>();
-            var speed = SystemAPI.Time.DeltaTime * config.MoveSpeed;
 
-            foreach (var (transform, input) in 
-                SystemAPI.Query<RefRW<LocalTransform>, RefRO<PlayerInputComponent>>()
+            foreach (var (transform, input, velocity) in 
+                SystemAPI.Query<RefRO<LocalTransform>, RefRO<PlayerInputComponent>, RefRW<PhysicsVelocity>>()
                     .WithAll<PlayerTag, Simulate>())
             {
                 if (input.ValueRO is { MoveHorizontal: 0, MoveVertical: 0 })
+                {
+                    velocity.ValueRW.Linear = float3.zero;
                     continue;
+                }
                 
-                var move = new float3(input.ValueRO.MoveHorizontal, 0, input.ValueRO.MoveVertical) * speed;
+                var move = new float3(input.ValueRO.MoveHorizontal, 0, input.ValueRO.MoveVertical) * config.MoveSpeed;
                 var rotatedMove = math.rotate(transform.ValueRO.Rotation, move);
-                transform.ValueRW.Position += rotatedMove;
+                velocity.ValueRW.Linear = rotatedMove;
             }
         }
     }
